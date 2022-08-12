@@ -52,7 +52,6 @@ public class EditorScript1 : MonoBehaviour
 		{
 			SistemaConstruccion_01 sc = GameObject.FindGameObjectWithTag("Player").GetComponent<SistemaConstruccion_01>();
 			sc.SacarPlanos(true);
-			GameObject.FindWithTag("Player").GetComponent<ControladorTerceraPersona>().Construir(true);
 			sc.enabled = false;
 
 
