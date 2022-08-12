@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IBuildingController{
+    bool getIsBuilding();
+}
+
 public class ControladorTerceraPersona : MonoBehaviour 
 {
 
@@ -11,17 +15,25 @@ public class ControladorTerceraPersona : MonoBehaviour
     private float verticalAnimatorActivation, horizontalAnimatorActivation, mouseXAnimatorActivation;
     private Vector3 velocity;
 
-    public bool enSuelo = true, isHittingWall = false;
+    public bool enSuelo = true, isHittingWall = false, canBuild = true;
     public Transform groundChecker, lookAtPoint;
     public LayerMask FloorMask, IgnoreRaycast;
     public float sensitivity = 5f, groundCheckerRadius = .4f, speed;
 
+    private IBuildingController buildingController;
 
     private void Awake() {
         anim = gameObject.GetComponent<Animator>();
         // layer 1 is torso
         anim.SetLayerWeight(1, 1);
         charController = gameObject.GetComponent<CharacterController>();
+
+        if (canBuild) {
+            buildingController = gameObject.GetComponent<IBuildingController>();
+            if (buildingController == null) {
+                Debug.LogWarning("No building controller found");
+            }
+        }
     }
 
     private void Update() {
@@ -90,9 +102,16 @@ public class ControladorTerceraPersona : MonoBehaviour
         anim.SetFloat("Vertical", verticalAnimatorActivation);
         anim.SetFloat("MouseX", mouseXAnimatorActivation);
         anim.SetFloat("Horizontal", horizontalAnimatorActivation);
-        bool isBuilding = gameObject.GetComponent<SistemaConstruccion_01>().puedeConstruir || 
-                          GameObject.Find("Main Camera").GetComponent<EditorScript>().editando;
-        anim.SetBool("Construyendo", isBuilding);
+
+        if (canBuild && buildingController != null) {
+            bool isBuilding = buildingController.getIsBuilding();
+            // print("Is building: " + isBuilding);
+            // maybe this is a good use case of strategy pattern bcs I'm not sure if my character is gonna
+            // be able to build so I can't add a isBuilding property in this class nor in the buildingController
+            // since that is data managed by the character
+            anim.SetBool("Construyendo", isBuilding);
+        }
+
         //anim.SetBool("Cayendo",!enSuelo);
     }
 
